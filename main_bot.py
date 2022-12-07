@@ -31,6 +31,13 @@ def main() -> None:
         )
     )
 
+    application.add_handler(
+        CommandHandler(
+            'add_me', 
+            actions.addme,
+        )
+    )
+
 
     # Run the bot until the user presses Ctrl-C
     application.run_polling()

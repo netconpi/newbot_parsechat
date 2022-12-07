@@ -1,6 +1,7 @@
 
 import json
 import key_words
+import db
 
 # Read base properties 
 file = open("settings.json")
@@ -23,7 +24,7 @@ client = TelegramClient('anon', api_id, api_hash).start()
 @client.on(events.NewMessage)
 async def new_message(event):
     # Get information about sender 
-    sender = sender = await event.get_sender()
+    sender = await event.get_sender()
     name = utils.get_display_name(sender)
     telegram_from = utils.get_input_user(sender).user_id
     print(name, telegram_from)
@@ -32,6 +33,7 @@ async def new_message(event):
     for i in key_words.kwrd:
         if i in got_text:
             await client.send_message('me', f'@{name}; \ntg://user?id={telegram_from} \ntext: {got_text}')
+            db.add_offer(name, telegram_from, got_text, 'Без источника')
             break
 
     # Handler text from sender 

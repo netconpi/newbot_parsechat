@@ -1,2 +1,7 @@
 __pycache__
 order_venv
+settings.json
+data.db
+data.sqbpro
+anon.session
+anon.session-journal
