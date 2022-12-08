@@ -8,7 +8,13 @@ from telegram.ext import (
     ConversationHandler,
     MessageHandler,
     filters,
+    CallbackQueryHandler,
 )
+
+from warnings import filterwarnings
+from telegram.warnings import PTBUserWarning
+
+filterwarnings(action="ignore", message=r".*CallbackQueryHandler", category=PTBUserWarning)
 
 import json
 import actions
@@ -37,6 +43,52 @@ def main() -> None:
             actions.addme,
         )
     )
+
+    # Check actions.py | block: remove/add user
+
+    addremove_user = ConversationHandler(
+        entry_points=[CommandHandler('user_admin', actions.start_admin)],
+        states={
+            actions.SELECT_UU: [
+                MessageHandler(
+                    filters.COMMAND,
+                    actions.command_called,
+                )
+            ],
+            actions.ACTION_UU: [
+                CallbackQueryHandler(actions.delete_user, pattern="^Delete$"),
+                CallbackQueryHandler(actions.close, pattern="^Close$"),
+                CallbackQueryHandler(actions.add_accs, pattern="^Add_Accses$"),
+            ]
+        },
+        fallbacks=[CommandHandler('close', actions.close_all)],
+    )
+
+    application.add_handler(addremove_user)
+
+    # Check actions.py | block: remove/add keywords (kw)
+
+    addremove_keyword = ConversationHandler(
+        entry_points=[CommandHandler('kw', actions.kw_start)],
+        states={
+            actions.ACT_KW: [
+                CallbackQueryHandler(actions.add_kw, pattern="^add_word$"),
+                CallbackQueryHandler(actions.remove_kw, pattern="^remove_word$"),
+                CallbackQueryHandler(actions.view_kw, pattern="^view_word$"),
+                CallbackQueryHandler(actions.close, pattern="^Close$"),
+            ],
+            actions.ADD_PROC_KW: [
+                MessageHandler(filters.TEXT, actions.record_word),
+            ],
+            actions.CONFIRM_KW: [
+                CallbackQueryHandler(actions.confirm_kw, pattern="^conf$"),
+                CallbackQueryHandler(actions.forget_kw, pattern="^forget$"),
+            ]
+        },
+        fallbacks=[CommandHandler('close', actions.close_all)],
+    )
+
+    application.add_handler(addremove_keyword)
 
 
     # Run the bot until the user presses Ctrl-C
