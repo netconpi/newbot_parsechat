@@ -29,8 +29,10 @@ async def new_message(event):
     telegram_from = utils.get_input_user(sender).user_id
     print(name, telegram_from)
 
+    kw_list = db.get_kw_list()
+
     got_text = event.raw_text.lower()
-    for i in key_words.kwrd:
+    for i in kw_list:
         if i in got_text:
             await client.send_message('me', f'@{name}; \ntg://user?id={telegram_from} \ntext: {got_text}')
             db.add_offer(name, telegram_from, got_text, 'Без источника')

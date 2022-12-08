@@ -182,17 +182,40 @@ async def record_word(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
 async def remove_kw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
     await query.answer()
-    await query.edit_message_text(text="Отправь мне слово, а я его добавлю: ")
-    context.user_data['proc_kw'] = {'action': 'add', 'word': ''}
-    return ADD_PROC_KW
+    await query.edit_message_text(
+        text="ID! Направь ID, а я его удалю!: \n"
+        f"{db.get_kw()}"
+    )
+    context.user_data['proc_kw'] = {'action': 'remove', 'word': ''}
+    return REMOVE_PROV_KW
+
+
+async def rec_rm_word(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    txt_user = update.message.text
+    context.user_data['proc_kw']['word'] = db.get_word(txt_user)
+
+    keyboard = [
+        [
+            InlineKeyboardButton("Да", callback_data="conf"),
+            InlineKeyboardButton("Забыть", callback_data="forget"),
+        ],
+    ]
+
+    await update.message.reply_text(
+        "Я получил от тебя слово: \n\t"
+        f"Ты действительно хочешь удалить {context.user_data['proc_kw']['word']} "
+        "из списока ключевых слов?",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+
+    return CONFIRM_KW
 
 # TODO: what if just view?
 async def view_kw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
     await query.answer()
-    await query.edit_message_text(text="Отправь мне слово, а я его добавлю: ")
-    context.user_data['proc_kw'] = {'action': 'add', 'word': ''}
-    return ADD_PROC_KW
+    await query.edit_message_text(text=f"{db.get_kw()}")
+    return ConversationHandler.END
 
 # TODO: Comm methods
 async def confirm_kw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:

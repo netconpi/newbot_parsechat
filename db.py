@@ -104,3 +104,43 @@ def remove_kw(word):
     
     cur.execute(f"DELETE FROM keywords WHERE word='{word}'")
     con.commit()
+
+
+def get_kw():
+    con = connect()
+    cur = con.cursor()
+
+    cur.execute('SELECT * FROM keywords')
+    txt_out = "Список ключевых слов. \nID - Ключевое слово\n"
+    res = cur.fetchall()
+
+    for i in res:
+        txt_out += f"{i[0]} - {i[1]}\n"
+
+    return txt_out
+
+def get_word(idd):
+    con = connect()
+    cur = con.cursor()
+
+    cur.execute(f'SELECT word FROM keywords WHERE id={idd}')
+    res = cur.fetchall()
+
+    if res:
+        return res[0][0]
+    else:
+        return 0
+
+
+def get_kw_list():
+    con = connect()
+    cur = con.cursor()
+
+    cur.execute(f'SELECT word FROM keywords')
+    res = cur.fetchall()
+    kw_list = []
+
+    for i in res:
+        kw_list.append(i[0])
+
+    return kw_list

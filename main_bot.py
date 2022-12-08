@@ -80,6 +80,9 @@ def main() -> None:
             actions.ADD_PROC_KW: [
                 MessageHandler(filters.TEXT, actions.record_word),
             ],
+            actions.REMOVE_PROV_KW: [
+                MessageHandler(filters.TEXT, actions.rec_rm_word),
+            ],
             actions.CONFIRM_KW: [
                 CallbackQueryHandler(actions.confirm_kw, pattern="^conf$"),
                 CallbackQueryHandler(actions.forget_kw, pattern="^forget$"),
