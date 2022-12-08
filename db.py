@@ -144,3 +144,31 @@ def get_kw_list():
         kw_list.append(i[0])
 
     return kw_list
+
+def get_mailing_list():
+    con = connect()
+    cur = con.cursor()
+
+    cur.execute(f'SELECT tg_id FROM acc_garanted')
+    res = cur.fetchall()
+    ac_list = []
+
+    for i in res:
+        ac_list.append(i[0])
+
+    return ac_list
+
+def build_message():
+    con = connect()
+    cur = con.cursor()
+
+    cur.execute(f'SELECT text, tg_id, id FROM messages')
+    res = cur.fetchall()
+    txt_out = ''
+
+    for i in res:
+        txt_out += f"{'-'*30}\nПользователь: tg://user?id={i[1]}\nТЕКСТ: {i[0]}\n{'-'*30}\n"
+        cur.execute(f"DELETE FROM messages WHERE id={i[2]}")
+        con.commit()
+
+    return txt_out
