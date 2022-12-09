@@ -122,12 +122,11 @@ async def close_all(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 # -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
 # TODO: Add/Remove keywords
-ADD_KW, REMOVE_KW, ACT_KW, CONFIRM_KW, ADD_PROC_KW, REMOVE_PROV_KW = range(6)
+ADD_KW, REMOVE_KW, ACT_KW, CONFIRM_KW, ADD_PROC_KW, REMOVE_PROV_KW, SELECT_KW_TP = range(7)
 
 
-# TODO: ask action type: remove or add or view
-async def kw_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    
+def main_keyboard():
+
     keyboard = [
         [
             InlineKeyboardButton("Добавить слово", callback_data="add_word"),
@@ -138,11 +137,52 @@ async def kw_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             InlineKeyboardButton("Закрыть", callback_data="Close"),
         ]
     ]
+
+    return keyboard
+
+
+# TODO: ask action type: remove or add or view
+async def selector_kw_type(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     
+    keyboard = [
+        [
+            InlineKeyboardButton("Минус-слова", callback_data="minus_type"),
+            InlineKeyboardButton("Ключевые слова", callback_data="key_type"),
+        ],
+        [
+            InlineKeyboardButton("Закрыть", callback_data="Close"),
+        ]
+    ]
+
+    await update.message.reply_text(
+        "Выберите тип редактируемых ключ. слов: ",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+
+    return SELECT_KW_TP
+
+
+async def mins_edit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    
+    context.user_data['key_type'] = 'minus'
+
+    await update.message.reply_text(
+        "Редактирование (минус) ключевых слов: "
+        "\nВыберите, что вы хотите выполнить? ",
+        reply_markup=InlineKeyboardMarkup(main_keyboard())
+    )
+
+    return ACT_KW
+
+
+async def key_edit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    
+    context.user_data['key_type'] = 'key'
+
     await update.message.reply_text(
         "Редактирование ключевых слов: "
         "\nВыберите, что вы хотите выполнить? ",
-        reply_markup=InlineKeyboardMarkup(keyboard)
+        reply_markup=InlineKeyboardMarkup(main_keyboard())
     )
 
     return ACT_KW
@@ -184,7 +224,7 @@ async def remove_kw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await query.answer()
     await query.edit_message_text(
         text="ID! Направь ID, а я его удалю!: \n"
-        f"{db.get_kw()}"
+        f"{db.get_kw(context.user_data['key_type'])}"
     )
     context.user_data['proc_kw'] = {'action': 'remove', 'word': ''}
     return REMOVE_PROV_KW
@@ -192,7 +232,7 @@ async def remove_kw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 async def rec_rm_word(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     txt_user = update.message.text
-    context.user_data['proc_kw']['word'] = db.get_word(txt_user)
+    context.user_data['proc_kw']['word'] = db.get_word(txt_user, context.user_data['key_type'])
 
     keyboard = [
         [
@@ -210,12 +250,14 @@ async def rec_rm_word(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
 
     return CONFIRM_KW
 
+
 # TODO: what if just view?
 async def view_kw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
     await query.answer()
-    await query.edit_message_text(text=f"{db.get_kw()}")
+    await query.edit_message_text(text=f"{db.get_kw(context.user_data['key_type'])}")
     return ConversationHandler.END
+
 
 # TODO: Comm methods
 async def confirm_kw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -224,17 +266,19 @@ async def confirm_kw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await query.edit_message_text(text="Хорошо! Я выполнил данную операцию. Крайний срок внесения изменений 20 секунд")
     
     if context.user_data['proc_kw']['action'] == "add":
-        db.add_kw(context.user_data['proc_kw']['word'])
+        db.add_kw(context.user_data['proc_kw']['word'], context.user_data['key_type'])
     elif context.user_data['proc_kw']['action'] == "remove":
-        db.remove_kw(context.user_data['proc_kw']['word'])
+        db.remove_kw(context.user_data['proc_kw']['word'], context.user_data['key_type'])
     
     return ConversationHandler.END
+
 
 async def forget_kw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
     await query.answer()
     await query.edit_message_text(text="Ничего небыло! Все забыл <3")
     return ConversationHandler.END
+
 
 async def contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     txt_user = update.message.text[1:].split('_')[-1]

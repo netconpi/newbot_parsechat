@@ -96,29 +96,41 @@ def add_accs(tg_id):
     con.close()
 
 
-def add_kw(word):
+def add_kw(word, kw_type):
     con = connect()
     cur = con.cursor()
     
-    cur.execute(f"INSERT INTO keywords (word) VALUES ('{word}')")
+    if kw_type == "minus":
+        cur.execute(f"INSERT INTO minus_words (word) VALUES ('{word}')")
+    elif kw_type == "key":
+        cur.execute(f"INSERT INTO keywords (word) VALUES ('{word}')")
+
     con.commit()
     con.close()
 
 
-def remove_kw(word):
+def remove_kw(word, kw_type):
     con = connect()
     cur = con.cursor()
     
-    cur.execute(f"DELETE FROM keywords WHERE word='{word}'")
+    if kw_type == "minus":
+        cur.execute(f"DELETE FROM minus_words WHERE word='{word}'")
+    elif kw_type == "key":
+        cur.execute(f"DELETE FROM keywords WHERE word='{word}'")
+
     con.commit()
     con.close()
 
 
-def get_kw():
+def get_kw(kw_type):
     con = connect()
     cur = con.cursor()
 
-    cur.execute('SELECT * FROM keywords')
+    if kw_type == "minus":
+        cur.execute("SELECT * FROM minus_words")
+    elif kw_type == "key":
+        cur.execute('SELECT * FROM keywords')
+        
     txt_out = "Список ключевых слов. \nID - Ключевое слово\n"
     res = cur.fetchall()
 
@@ -128,11 +140,16 @@ def get_kw():
 
     return txt_out
 
-def get_word(idd):
+def get_word(idd, kw_type):
     con = connect()
     cur = con.cursor()
 
-    cur.execute(f'SELECT word FROM keywords WHERE id={idd}')
+    if kw_type == "minus":
+        cur.execute(f"SELECT word FROM minus_words WHERE id={idd}")
+    elif kw_type == "key":
+        cur.execute(f'SELECT word FROM keywords WHERE id={idd}')
+        
+
     res = cur.fetchall()
     con.close()
 
@@ -147,6 +164,20 @@ def get_kw_list():
     cur = con.cursor()
 
     cur.execute(f'SELECT word FROM keywords')
+    res = cur.fetchall()
+    kw_list = []
+
+    for i in res:
+        kw_list.append(i[0])
+    con.close()
+
+    return kw_list
+
+def get_kw_min_list():
+    con = connect()
+    cur = con.cursor()
+
+    cur.execute(f'SELECT word FROM minus_words')
     res = cur.fetchall()
     kw_list = []
 
@@ -179,7 +210,7 @@ def build_message():
     txt_out = ''
 
     for i in res:
-        txt_out += f"{'X'*30}\n%2Fcontact_{i[1]}\nТЕКСТ: {i[0]}\n{'X'*30}\n"
+        txt_out += f"{'⬇️'*30}\n%2Fcontact_{i[1]}\nТЕКСТ: {i[0]}\n{'⬆️'*30}\n"
         cur.execute(f"DELETE FROM messages WHERE id={i[2]}")
         con.commit()
 

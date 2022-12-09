@@ -69,8 +69,13 @@ def main() -> None:
     # Check actions.py | block: remove/add keywords (kw)
 
     addremove_keyword = ConversationHandler(
-        entry_points=[CommandHandler('kw', actions.kw_start)],
+        entry_points=[CommandHandler('kw', actions.selector_kw_type)],
         states={
+            actions.SELECT_KW_TP: [
+                CallbackQueryHandler(actions.mins_edit, pattern="^remove_word$"),
+                CallbackQueryHandler(actions.key_edit, pattern="^view_word$"),
+                CallbackQueryHandler(actions.close, pattern="^Close$"),
+            ],
             actions.ACT_KW: [
                 CallbackQueryHandler(actions.add_kw, pattern="^add_word$"),
                 CallbackQueryHandler(actions.remove_kw, pattern="^remove_word$"),
