@@ -40,7 +40,7 @@ async def start_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
 
     user_id = update.message['chat']['id']
     if not db.checkuser_status(user_id):
-        update.message.reply_text("Прости. Нет прав. Запроси /add_me")
+        await update.message.reply_text("Прости. Нет прав. Запроси /add_me")
         return ConversationHandler.END
 
 
@@ -153,7 +153,7 @@ async def selector_kw_type(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
     user_id = update.message['chat']['id']
     if not db.checkuser_status(user_id):
-        update.message.reply_text("Прости. Нет прав. Запроси /add_me")
+        await update.message.reply_text("Прости. Нет прав. Запроси /add_me")
         return ConversationHandler.END
 
     keyboard = [
