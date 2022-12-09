@@ -101,7 +101,7 @@ def add_kw(word, kw_type):
     cur = con.cursor()
     
     if kw_type == "minus":
-        cur.execute(f"INSERT INTO minus_words (word) VALUES ('{word}')")
+        cur.execute(f"INSERT INTO min_words (word) VALUES ('{word}')")
     elif kw_type == "key":
         cur.execute(f"INSERT INTO keywords (word) VALUES ('{word}')")
 
@@ -114,7 +114,7 @@ def remove_kw(word, kw_type):
     cur = con.cursor()
     
     if kw_type == "minus":
-        cur.execute(f"DELETE FROM minus_words WHERE word='{word}'")
+        cur.execute(f"DELETE FROM min_words WHERE word='{word}'")
     elif kw_type == "key":
         cur.execute(f"DELETE FROM keywords WHERE word='{word}'")
 
@@ -127,7 +127,7 @@ def get_kw(kw_type):
     cur = con.cursor()
 
     if kw_type == "minus":
-        cur.execute("SELECT * FROM minus_words")
+        cur.execute("SELECT * FROM min_words")
     elif kw_type == "key":
         cur.execute('SELECT * FROM keywords')
         
@@ -145,7 +145,7 @@ def get_word(idd, kw_type):
     cur = con.cursor()
 
     if kw_type == "minus":
-        cur.execute(f"SELECT word FROM minus_words WHERE id={idd}")
+        cur.execute(f"SELECT word FROM min_words WHERE id={idd}")
     elif kw_type == "key":
         cur.execute(f'SELECT word FROM keywords WHERE id={idd}')
         

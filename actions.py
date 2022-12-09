@@ -164,11 +164,16 @@ async def selector_kw_type(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
 async def mins_edit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     
+    query = update.callback_query
+    await query.answer()
+
     context.user_data['key_type'] = 'minus'
 
-    await update.message.reply_text(
+    await query.edit_message_text(
         "Редактирование (минус) ключевых слов: "
         "\nВыберите, что вы хотите выполнить? ",
+    )
+    await query.edit_message_reply_markup(
         reply_markup=InlineKeyboardMarkup(main_keyboard())
     )
 
@@ -177,11 +182,16 @@ async def mins_edit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 async def key_edit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     
+    query = update.callback_query
+    await query.answer()
+
     context.user_data['key_type'] = 'key'
 
-    await update.message.reply_text(
+    await query.edit_message_text(
         "Редактирование ключевых слов: "
         "\nВыберите, что вы хотите выполнить? ",
+    )
+    await query.edit_message_reply_markup(
         reply_markup=InlineKeyboardMarkup(main_keyboard())
     )
 

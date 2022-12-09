@@ -72,8 +72,8 @@ def main() -> None:
         entry_points=[CommandHandler('kw', actions.selector_kw_type)],
         states={
             actions.SELECT_KW_TP: [
-                CallbackQueryHandler(actions.mins_edit, pattern="^remove_word$"),
-                CallbackQueryHandler(actions.key_edit, pattern="^view_word$"),
+                CallbackQueryHandler(actions.mins_edit, pattern="^minus_type$"),
+                CallbackQueryHandler(actions.key_edit, pattern="^key_type$"),
                 CallbackQueryHandler(actions.close, pattern="^Close$"),
             ],
             actions.ACT_KW: [
