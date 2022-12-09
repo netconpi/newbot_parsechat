@@ -15,7 +15,7 @@ while 1:
     message = db.build_message()
 
     for i in mailing:
-        url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={i}&text={message}"
+        url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={i}&text={message}&parse_mode=HTML"
         print(requests.get(url).json())
 
     time.sleep(10)

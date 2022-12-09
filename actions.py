@@ -236,3 +236,10 @@ async def forget_kw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await query.edit_message_text(text="Ничего небыло! Все забыл <3")
     return ConversationHandler.END
 
+async def contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    txt_user = update.message.text[1:].split('_')[-1]
+    await update.message.reply_text(
+        f"<a href='https://web.telegram.org/k/#{txt_user}'>Написать!</a>",
+        parse_mode='HTML',
+    )
+

@@ -18,6 +18,7 @@ def add_offer(name, tg_id, text, source):
     )
 
     con.commit()
+    con.close()
 
 
 def add_me(tg_id):
@@ -29,6 +30,7 @@ def add_me(tg_id):
     )
 
     con.commit()
+    con.close()
 
 
 def get_all_users():
@@ -44,6 +46,7 @@ def get_all_users():
 
     cur.execute("SELECT tg_id FROM verify")
     verify_list = cur.fetchall()
+    con.close()
 
     return garanted_list, verify_list
 
@@ -66,6 +69,7 @@ def checkuser_status(tg_id):
         return 1
     if verify_list:
         return 0
+    con.close()
 
 
 def remove_from_list(tg_id):
@@ -77,6 +81,7 @@ def remove_from_list(tg_id):
         cur.execute(f"DELETE FROM verify WHERE tg_id={tg_id}")
 
     con.commit()
+    con.close()
 
 
 def add_accs(tg_id):
@@ -88,6 +93,7 @@ def add_accs(tg_id):
 
     cur.execute(f"INSERT INTO acc_garanted (tg_id) VALUES ({tg_id})")
     con.commit()
+    con.close()
 
 
 def add_kw(word):
@@ -96,6 +102,7 @@ def add_kw(word):
     
     cur.execute(f"INSERT INTO keywords (word) VALUES ('{word}')")
     con.commit()
+    con.close()
 
 
 def remove_kw(word):
@@ -104,6 +111,7 @@ def remove_kw(word):
     
     cur.execute(f"DELETE FROM keywords WHERE word='{word}'")
     con.commit()
+    con.close()
 
 
 def get_kw():
@@ -116,6 +124,7 @@ def get_kw():
 
     for i in res:
         txt_out += f"{i[0]} - {i[1]}\n"
+    con.close()
 
     return txt_out
 
@@ -125,6 +134,7 @@ def get_word(idd):
 
     cur.execute(f'SELECT word FROM keywords WHERE id={idd}')
     res = cur.fetchall()
+    con.close()
 
     if res:
         return res[0][0]
@@ -142,6 +152,7 @@ def get_kw_list():
 
     for i in res:
         kw_list.append(i[0])
+    con.close()
 
     return kw_list
 
@@ -155,6 +166,7 @@ def get_mailing_list():
 
     for i in res:
         ac_list.append(i[0])
+    con.close()
 
     return ac_list
 
@@ -167,8 +179,10 @@ def build_message():
     txt_out = ''
 
     for i in res:
-        txt_out += f"{'-'*30}\nПользователь: tg://user?id={i[1]}\nТЕКСТ: {i[0]}\n{'-'*30}\n"
+        txt_out += f"{'X'*30}\n%2Fcontact_{i[1]}\nТЕКСТ: {i[0]}\n{'X'*30}\n"
         cur.execute(f"DELETE FROM messages WHERE id={i[2]}")
         con.commit()
+
+    con.close()
 
     return txt_out

@@ -93,6 +93,13 @@ def main() -> None:
 
     application.add_handler(addremove_keyword)
 
+    application.add_handler(
+        MessageHandler(
+            (filters.COMMAND & filters.Regex("^/contact_[0-9]+$")),
+            actions.contact,
+        )
+    )
+
 
     # Run the bot until the user presses Ctrl-C
     application.run_polling()

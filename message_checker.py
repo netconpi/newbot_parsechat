@@ -10,6 +10,7 @@ configuration = json.load(file)
 # Import the client
 from telethon import TelegramClient, events, utils
 import asyncio
+import re
 
 # Define some variables so the code reads easier
 # session = os.environ.get('TG_SESSION', 'printer')
@@ -32,10 +33,10 @@ async def new_message(event):
     kw_list = db.get_kw_list()
 
     got_text = event.raw_text.lower()
+    fin_text = re.sub("[^A-Za-zА-Яа-я0-9 ]+", " ", got_text)
     for i in kw_list:
         if i in got_text:
-            await client.send_message('me', f'@{name}; \ntg://user?id={telegram_from} \ntext: {got_text}')
-            db.add_offer(name, telegram_from, got_text, 'Без источника')
+            db.add_offer(name, telegram_from, fin_text, 'Без источника')
             break
 
     # Handler text from sender 
