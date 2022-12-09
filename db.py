@@ -177,7 +177,7 @@ def get_kw_min_list():
     con = connect()
     cur = con.cursor()
 
-    cur.execute(f'SELECT word FROM minus_words')
+    cur.execute(f'SELECT word FROM min_words')
     res = cur.fetchall()
     kw_list = []
 
@@ -210,7 +210,7 @@ def build_message():
     txt_out = ''
 
     for i in res:
-        txt_out += f"{'⬇️'*30}\n%2Fcontact_{i[1]}\nТЕКСТ: {i[0]}\n{'⬆️'*30}\n"
+        txt_out += f"{'⬇️'*10}\n%2Fcontact_{i[1]}\nТЕКСТ: {i[0]}\n{'⬆️'*10}\n"
         cur.execute(f"DELETE FROM messages WHERE id={i[2]}")
         con.commit()
 

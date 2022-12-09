@@ -35,12 +35,21 @@ async def new_message(event):
 
     got_text = event.raw_text.lower()
     fin_text = re.sub("[^A-Za-zА-Яа-я0-9 ]+", " ", got_text)
+
+    check = 0
+
     for i in kw_list:
         if i in got_text:
-            for j in kw_min_list:
-                if not (j in got_text):
-                    db.add_offer(name, telegram_from, fin_text, 'Без источника')
-                    break
+            check = 1
+            break
+    
+    for i in kw_min_list:
+        if i in got_text:
+            check = 0
+            break
+
+    if check:
+        db.add_offer(name, telegram_from, fin_text, 'Без источника')
 
     # Handler text from sender 
 
