@@ -38,6 +38,12 @@ ACTION_UU, SELECT_UU, CONFIRM_UU = range(3)
 
 async def start_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
+    user_id = update.message['chat']['id']
+    if not db.checkuser_status(user_id):
+        update.message.reply_text("Прости. Нет прав. Запроси /add_me")
+        return ConversationHandler.END
+
+
     garanted, req_users = db.get_all_users()
     txt_users = ""
 
@@ -144,6 +150,12 @@ def main_keyboard():
 # TODO: ask action type: remove or add or view
 async def selector_kw_type(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     
+
+    user_id = update.message['chat']['id']
+    if not db.checkuser_status(user_id):
+        update.message.reply_text("Прости. Нет прав. Запроси /add_me")
+        return ConversationHandler.END
+
     keyboard = [
         [
             InlineKeyboardButton("Минус-слова", callback_data="minus_type"),
