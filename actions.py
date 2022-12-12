@@ -1,4 +1,5 @@
 
+import json
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes, ConversationHandler
 
@@ -128,7 +129,7 @@ async def close_all(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 # -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
 # TODO: Add/Remove keywords
-ADD_KW, REMOVE_KW, ACT_KW, CONFIRM_KW, ADD_PROC_KW, REMOVE_PROV_KW, SELECT_KW_TP = range(7)
+ADD_KW, REMOVE_KW, ACT_KW, CONFIRM_KW, ADD_PROC_KW, REMOVE_PROV_KW, SELECT_KW_TP, VIEW_L_KW = range(8)
 
 
 def main_keyboard():
@@ -240,14 +241,63 @@ async def record_word(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     return CONFIRM_KW
 
 
+def generate_keyboard(page_cur, max_page):
+
+    max_page -= 1
+    print(page_cur, max_page)
+
+    if page_cur == 0 and page_cur == max_page:
+        keyboard = [
+            [
+                InlineKeyboardButton("Закрыть", callback_data="Close"),
+            ],
+        ]
+    if page_cur == 0 and page_cur < max_page:
+        keyboard = [
+            [
+                InlineKeyboardButton("Закрыть", callback_data="Close"),
+                InlineKeyboardButton("⏭️", callback_data="next_pg"),
+            ],
+        ]
+    if page_cur < max_page and max_page < page_cur:
+        keyboard = [
+            [
+                InlineKeyboardButton("⏮️", callback_data="prev_pg"),
+                InlineKeyboardButton(f"{page_cur+1}/{max_page+1}", callback_data="cur_pg"),
+                InlineKeyboardButton("⏭️", callback_data="next_pg"),
+            ],
+            [
+                InlineKeyboardButton("Закрыть", callback_data="Close"),
+            ]
+        ]
+    if page_cur == max_page and page_cur != 0:
+        keyboard = [
+            [
+                InlineKeyboardButton("⏮️", callback_data="prev_pg"),
+                InlineKeyboardButton("Закрыть", callback_data="Close"),
+            ],
+        ]
+    
+
+    return keyboard
+
+
+def split_message(text):
+    print(text)
+    msgs = [text[i:i + 4096] for i in range(0, len(text), 4096)]
+    print(msgs)
+    return msgs
+
+
 # TODO: what if remove
 async def remove_kw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
     await query.answer()
+
     await query.edit_message_text(
-        text="ID! Направь ID, а я его удалю!: \n"
-        f"{db.get_kw(context.user_data['key_type'])}"
+        text="ID! Направь ID, посмотри его в списке всех слов!: \n"
     )
+
     context.user_data['proc_kw'] = {'action': 'remove', 'word': ''}
     return REMOVE_PROV_KW
 
@@ -277,8 +327,72 @@ async def rec_rm_word(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
 async def view_kw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
     await query.answer()
-    await query.edit_message_text(text=f"{db.get_kw(context.user_data['key_type'])}")
-    return ConversationHandler.END
+
+    msgs = split_message(db.get_kw(context.user_data['key_type']))
+    len_msgs = len(msgs)
+    context.user_data['view_kw'] = {
+        'cur_page': 0, 
+        'msgs': msgs,
+        'max_pages': len_msgs,
+    }
+
+    print(context.user_data['view_kw']['cur_page'], context.user_data['view_kw']['max_pages'], context.user_data['view_kw']['msgs'])
+
+    await query.edit_message_text(msgs[0])
+    await query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(generate_keyboard(0, len_msgs)))
+
+    return VIEW_L_KW
+
+
+# TODO: next_page, prev_page
+async def next_page(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    query = update.callback_query
+    await query.answer()
+
+    cur_page = context.user_data['view_kw']['cur_page']
+    max_pages = context.user_data['view_kw']['max_pages']
+
+    cur_page += 1
+    if cur_page <= max_pages:
+        req = context.user_data['view_kw']['msgs'][cur_page]
+        await query.edit_message_text(req)
+        await query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(generate_keyboard(cur_page, max_pages)))
+
+        context.user_data['view_kw']['cur_page'] = cur_page
+    # else:
+    #     req = context.user_data['view_kw']['msgs'][cur_page-1]
+    #     await query.edit_message_text(
+    #         "Странно что тебе дали такую возможность. Но нет страниц далее. \n"
+    #         f"{req}"
+    #     )
+    #     await query.edit_message_reply_markup(reply_markup=InlineKeyboardButton(generate_keyboard(cur_page - 1, max_pages)))
+
+    return VIEW_L_KW
+
+
+async def prev_page(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    query = update.callback_query
+    await query.answer()
+
+    cur_page = context.user_data['view_kw']['cur_page']
+    max_pages = context.user_data['view_kw']['max_pages']
+
+    cur_page -= 1
+    if cur_page >= 0:
+        req = context.user_data['view_kw']['msgs'][cur_page]
+        await query.edit_message_text(req)
+        await query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(generate_keyboard(cur_page, max_pages)))
+
+        context.user_data['view_kw']['cur_page'] = cur_page
+    # else:
+    #     req = context.user_data['view_kw']['msgs'][cur_page+1]
+    #     await query.edit_message_text(
+    #         "Странно что тебе дали такую возможность. Но нет страниц далее. \n"
+    #         f"{req}"
+    #     )
+    #     await query.edit_message_reply_markup(reply_markup=InlineKeyboardButton(generate_keyboard(cur_page, max_pages)))
+
+    return VIEW_L_KW
 
 
 # TODO: Comm methods

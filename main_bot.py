@@ -82,6 +82,11 @@ def main() -> None:
                 CallbackQueryHandler(actions.view_kw, pattern="^view_word$"),
                 CallbackQueryHandler(actions.close, pattern="^Close$"),
             ],
+            actions.VIEW_L_KW: [
+                CallbackQueryHandler(actions.next_page, pattern="^next_pg$"),
+                CallbackQueryHandler(actions.prev_page, pattern="^prev_pg$"),
+                CallbackQueryHandler(actions.close, pattern="^Close$"),
+            ],
             actions.ADD_PROC_KW: [
                 MessageHandler(filters.TEXT, actions.record_word),
             ],
